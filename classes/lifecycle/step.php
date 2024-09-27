@@ -37,6 +37,12 @@ class step extends libbase {
     public function process_course($processid, $instanceid, $course)
     {
         global $DB;
+
+        // Ensure that the buffer is flushed. Size settings is "logstore_standard/buffersize", defaulting to 50.
+        $manager = get_log_manager(true);
+        $store = new \logstore_standard\log\store($manager);
+        $store->flush();
+
         // Delete all logs of the course.
         // TODO: This should be configurable?.
         $DB->delete_records('logstore_standard_log', ['courseid' => $course->id]);
