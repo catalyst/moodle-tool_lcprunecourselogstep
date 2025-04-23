@@ -56,7 +56,7 @@ class step_test extends \advanced_testcase {
 
     /** @var stdClass $teacher a teacher. */
 
-    public function setUp() : void {
+    public function setUp(): void {
         global $USER, $DB;
 
         // We do not need a sesskey check in these tests.
@@ -107,10 +107,58 @@ class step_test extends \advanced_testcase {
                 'courseid' => $this->course->id,
                 'userid' => $i,
                 'anonymous' => 0,
-                'timecreated' => $i
+                'timecreated' => $i,
             ];
         }
         $DB->insert_records('logstore_standard_log', $dataobjects);
+
+        // Run trigger.
+        process_manager::manually_trigger_process($this->course->id, $this->trigger->id);
+
+        // There are log records for the course.
+        $logs = $DB->get_records('logstore_standard_log', ['courseid' => $this->course->id]);
+        $this->assertCount(10, $logs);
+
+        // Run processor.
+        $processor = new processor();
+        $processor->process_courses();
+
+        // No more logs for the course.
+        $logs = $DB->get_records('logstore_standard_log', ['courseid' => $this->course->id]);
+        $this->assertEmpty($logs);
+
+    }
+
+    /**
+     * Test course is hidden.
+     */
+    public function test_prune_log_step_for_deleted_course() {
+        global $DB;
+
+        $this->resetAfterTest();
+
+        // Create log records.
+        $coursecontext = \context_course::instance($this->course->id);
+        for ($i = 0; $i < 10; $i++) {
+            $dataobjects[] = [
+                'eventname' => '\core\event\unit_test',
+                'component' => 'core',
+                'action' => 'created',
+                'target' => 'course',
+                'crud' => 'r',
+                'edulevel' => 0,
+                'contextid' => $coursecontext->id,
+                'contextlevel' => 50,
+                'contextinstanceid' => $this->course->id,
+                'courseid' => $this->course->id,
+                'userid' => $i,
+                'anonymous' => 0,
+                'timecreated' => $i,
+            ];
+        }
+        $DB->insert_records('logstore_standard_log', $dataobjects);
+
+        delete_course($this->course); // Delete course.
 
         // Run trigger.
         process_manager::manually_trigger_process($this->course->id, $this->trigger->id);
