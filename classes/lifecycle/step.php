@@ -30,8 +30,13 @@ class step extends libbase {
         return 'tool_lcprunecourselogstep';
     }
 
+    public function get_plugin_name()
+    {
+        return get_string('pluginname', 'tool_lcprunecourselogstep');
+    }
+
     public function get_plugin_description() {
-        return "Prune course log";
+        return get_string('plugindescription', 'tool_lcprunecourselogstep');
     }
 
     public function process_course($processid, $instanceid, $course)
