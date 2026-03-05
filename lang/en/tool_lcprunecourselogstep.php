@@ -15,5 +15,5 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 $string['pluginname'] = 'Prune course log step';
-$string['plugindescription'] = 'This step allows to prune course logs.';
+$string['plugindescription'] = 'This step allows you to prune course logs.';
 $string['privacy:metadata'] = 'The plugin does not store any personal data.';
